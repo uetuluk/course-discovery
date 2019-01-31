@@ -488,6 +488,40 @@ class PkSearchableMixin:
 
         return queryset.filter(pk__in=ids)
 
+    @classmethod
+    def search_dsl(cls, query):
+        """ Queries the search index.
+
+        Args:
+            query (str) -- Elasticsearch querystring (e.g. `title:intro*`)
+
+        Returns:
+            QuerySet
+        """
+        query = clean_query(query)
+
+        if query == '(*)':
+            # Early-exit optimization. Wildcard searching is very expensive in elasticsearch. And since we just
+            # want everything, we don't need to actually query elasticsearch at all.
+            print('from ORM')
+            return cls.objects.all()
+
+        # results = SearchQuerySet().models(cls).raw_search(query)
+        from course_discovery.apps.course_metadata.search_indexes_dsl import CourseIndexDsl
+        from elasticsearch_dsl.connections import connections as connectionsDsl
+        from django.conf import settings
+        connectionsDsl.create_connection(
+            hosts=settings.ES_CONNECTIONS['default']['hosts']
+        )
+        import pdb; pdb.set_trace()
+        results = CourseIndexDsl.search().query('match', content_type='course').query('match', _all='{}'.format(query))
+        print('from ES then ORM')
+        # import pdb; pdb.set_trace()
+        ids = {result.pk for result in results}
+
+        connectionsDsl.remove_connection('default')
+        return cls.objects.filter(pk__in=ids)
+
 
 class Course(DraftModelMixin, PkSearchableMixin, TimeStampedModel):
     """ Course model. """

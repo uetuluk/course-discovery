@@ -45,7 +45,6 @@ class ElasticsearchUtils(object):
         Returns:
             index_name (str): Name of the new index.
         """
-        print("utils: " + prefix)
         timestamp = datetime.datetime.utcnow().strftime('%Y%m%d_%H%M%S')
         index_name = '{alias}_{timestamp}'.format(alias=prefix, timestamp=timestamp)
         if index_settings is None:

@@ -12,10 +12,6 @@ from course_discovery.apps.core.utils import ElasticsearchUtils
 class DocumentBase(es.Document):
 
     def get_index_queryset(self):
-        """
-        Base queryset for indexing the document.
-        Can be overriden while implementation.
-        """
         return self.get_model().all()
 
     @classmethod
@@ -38,7 +34,7 @@ class DocumentBase(es.Document):
                         'connection_name': name,
                         'connection': conn,
                         'index_name': index,
-                        'index_classes': value,
+                        'index_class': value,
                     }
         return None
 
@@ -80,7 +76,7 @@ class DocumentBase(es.Document):
             hosts=index['connection']['hosts']
         )
 
-        import pdb; pdb.set_trace()
+        cls.create_new_index(index)
         cls.prepare_document()
 
         # base queryset for indexing the docs.
@@ -121,8 +117,10 @@ class DocumentBase(es.Document):
         - Gets the queryset slice
         - creates the batch
         - indexes it
+
+        FIXME:temporarily using a list instead of a Qset
         """
-        for start in range(0, base_qset.count(), batch_size):
+        for start in range(0, len(base_qset), batch_size):
             end = start + batch_size
             qset = base_qset[start:end]
             batch = cls.create_batch(list(qset))
@@ -150,7 +148,6 @@ class DocumentBase(es.Document):
         We have used elasticsearch-py's bulk method here.
         """
         es = connectionsDsl.get_connection()
-        import pdb; pdb.set_trace()
         bulk(client=es, actions=batch)
 
     @classmethod
@@ -166,9 +163,11 @@ class DocumentBase(es.Document):
     @classmethod
     def remove_stale(cls, base_qset, batch_size):
         """
-        Removes docuemts that are present in the index but not in the db.
+        Removes documents that are present in the index but not in the db.
 
         Index meta id and db instance pk needs to be same.
+
+        FIXME: handle doc ids that are specific to content type
         """
         db_ids = list(base_qset.values_list('id', flat=True))
         s = cls.search()
@@ -183,3 +182,17 @@ class DocumentBase(es.Document):
                     removed.append(int(item.meta.id))
         for remove_id in removed:
             cls.get(id=remove_id).delete()
+
+    @classmethod
+    def create_new_index(cls, index_config):
+        es = connectionsDsl.get_connection()
+        alias = index_config['index_name']
+        index_name = ElasticsearchUtils.create_index(es, alias, 'ES-DSL')
+
+        body = {
+            'actions': [
+                {'remove': {'alias': alias, 'index': '*'}},
+                {'add': {'alias': alias, 'index': index_name}},
+            ]
+        }
+        es.indices.update_aliases(body)

@@ -3,10 +3,6 @@ from pydoc import locate
 from django.conf import settings
 from django.core.management.base import BaseCommand
 
-from elasticsearch_dsl.connections import connections as connectionsDsl
-
-from course_discovery.apps.core.utils import ElasticsearchUtils
-
 
 class Command(BaseCommand):
 

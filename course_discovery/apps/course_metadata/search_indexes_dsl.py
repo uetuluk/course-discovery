@@ -1,11 +1,14 @@
 import elasticsearch_dsl as es
 
-from .abstract_index import DocumentBase
+from course_discovery.apps.edx_elasticsearch_extensions.multi_model_index import MultiModelIndexBase
+from course_discovery.apps.edx_elasticsearch_extensions.abstract_index import DocumentBase
 from .models import Course, CourseRun
 
 
 class CourseRunIndexDsl(DocumentBase):
 
+    pk = es.Integer()
+    content_type = es.Text()
     uuid = es.Text()
     key = es.Text()
     title_override = es.Text(analyzer='snowball')
@@ -19,7 +22,7 @@ class CourseRunIndexDsl(DocumentBase):
     modified = es.Date()
 
     class Index:
-        name = 'catalog_dsl_course'
+        name = 'catalog_dsl'
         settings = {
             "number_of_shards": 1,
         }
@@ -27,30 +30,29 @@ class CourseRunIndexDsl(DocumentBase):
     def get_model(self):
         return CourseRun
 
-    def get_index_queryset(self):
+    def get_index_queryset_for_model(self):
         return self.get_model().objects.filter(status='published')
 
-    def get_updated_field(self):
-        return 'modified'
-
-    def create_document_dict(self, obj):
-        # this method is required.
-        self.obj = obj
-
+    @staticmethod
+    def create_document_dict(obj):
         doc = CourseRunIndexDsl(
+            content_type = 'courserun',
             uuid=obj.uuid,
             key=obj.key,
-            title_override=obj.title_override,
-            pacing_type=obj.pacing_type,
+            title=obj.title,
+            slug=obj.slug,
             modified=obj.modified,
+            pk=obj.id,
         )
 
-        doc.meta.id = obj.id
+        doc.meta.id = 'courserun.{}'.format(obj.id)
         return doc.to_dict(include_meta=True)
 
 
 class CourseIndexDsl(DocumentBase):
 
+    pk = es.Integer()
+    content_type = es.Text()
     uuid = es.Text()
     key = es.Text()
     title = es.Text(analyzer='snowball')
@@ -58,9 +60,10 @@ class CourseIndexDsl(DocumentBase):
     end = es.Date()
     slug = es.Text()
     modified = es.Date()
+    course_runs = es.Text(multi=True)
 
     class Index:
-        name = 'catalog_dsl_course'
+        name = 'catalog_dsl'
         settings = {
             "number_of_shards": 1,
         }
@@ -68,26 +71,45 @@ class CourseIndexDsl(DocumentBase):
     def get_model(self):
         return Course
 
-    def get_index_queryset(self):
+    def get_index_queryset_for_model(self):
         return self.get_model().objects.filter(uuid__isnull=False)
+
+    @staticmethod
+    def prepare_course_runs(obj):
+        return [course_run.key for course_run in obj.course_runs.all()]
+
+    @staticmethod
+    def create_document_dict(obj):
+        doc = CourseIndexDsl(
+            content_type = 'course',
+            uuid=obj.uuid,
+            key=obj.key,
+            title=obj.title,
+            slug=obj.slug,
+            modified=obj.modified,
+            course_runs=CourseIndexDsl.prepare_course_runs(obj),
+            pk=obj.id,
+        )
+
+        doc.meta.id = 'course.{}'.format(obj.id)
+        return doc.to_dict(include_meta=True)
+
+
+class CatalogIndexDsl(MultiModelIndexBase):
+    index_model_mappings = [
+        (Course, CourseIndexDsl),
+        (CourseRun, CourseRunIndexDsl)
+    ]
 
     def get_updated_field(self):
         return 'modified'
 
     def create_document_dict(self, obj):
         # this method is required.
-        self.obj = obj
-
-        doc = CourseIndexDsl(
-            uuid=obj.uuid,
-            key=obj.key,
-            title=obj.title,
-            slug=obj.slug,
-            modified=obj.modified,
-        )
-
-        doc.meta.id = obj.id
-        return doc.to_dict(include_meta=True)
+        for model, index_model in self.index_model_mappings:
+            if isinstance(obj, model):
+                return index_model.create_document_dict(obj)
+        return {}
 
 #
 # import json
