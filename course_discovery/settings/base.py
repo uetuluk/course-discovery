@@ -71,6 +71,7 @@ PROJECT_APPS = [
     'course_discovery.apps.catalogs',
     'course_discovery.apps.course_metadata',
     'course_discovery.apps.edx_haystack_extensions',
+    'course_discovery.apps.edx_elasticsearch_extensions',
     'course_discovery.apps.publisher',
     'course_discovery.apps.publisher_comments',
     'course_discovery.apps.journal',

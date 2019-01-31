@@ -3,6 +3,10 @@ from pydoc import locate
 from django.conf import settings
 from django.core.management.base import BaseCommand
 
+from elasticsearch_dsl.connections import connections as connectionsDsl
+
+from course_discovery.apps.core.utils import ElasticsearchUtils
+
 
 class Command(BaseCommand):
 
@@ -12,12 +16,12 @@ class Command(BaseCommand):
         self.connections = settings.ES_CONNECTIONS
         indexes = settings.ES_INDEXES
         for name, value in self.connections.items():
-            for index_name, index_class in indexes.get(name):
+            for index_name, index_classes in indexes.get(name):
                 self.indexes.append({
                     'connection_name': name,
                     'connection': value,
                     'index_name': index_name,
-                    'index_class': index_class,
+                    'index_classes': index_classes,
                 })
 
     def add_arguments(self, parser):
@@ -69,11 +73,31 @@ class Command(BaseCommand):
         return indexes
 
     def clear_index(self, index):
-        IndexClass = locate(index['index_class'])
-        index_obj = IndexClass()
-        index_obj.clear_index()
+        for index_class in index['index_classes']:
+            IndexClass = locate(index_class)
+            index_obj = IndexClass()
+            index_obj.clear_index()
 
     def index_documents(self, index):
-        IndexClass = locate(index['index_class'])
-        IndexClass.index_documents(
-            index, self.batch_size, self.remove, self.age)
+        self.create_new_index(index)
+        for index_class in index['index_classes']:
+            IndexClass = locate(index_class)
+            IndexClass.index_documents(
+                index, self.batch_size, self.remove, self.age)
+
+    @staticmethod
+    def create_new_index(index_config):
+        es = connectionsDsl.create_connection(
+            hosts=index_config['connection']['hosts']
+        )
+        alias = index_config['index_name']
+        index_name = ElasticsearchUtils.create_index(es, alias, 'ES-DSL')
+
+        body = {
+            'actions': [
+                {'remove': {'alias': alias, 'index': '*'}},
+                {'add': {'alias': alias, 'index': index_name}},
+            ]
+        }
+        es.indices.update_aliases(body)
+        connectionsDsl.remove_connection(index_config['connection_name'])

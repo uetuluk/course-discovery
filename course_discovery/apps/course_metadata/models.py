@@ -503,23 +503,13 @@ class PkSearchableMixin:
         if query == '(*)':
             # Early-exit optimization. Wildcard searching is very expensive in elasticsearch. And since we just
             # want everything, we don't need to actually query elasticsearch at all.
-            print('from ORM')
             return cls.objects.all()
 
-        # results = SearchQuerySet().models(cls).raw_search(query)
-        from course_discovery.apps.course_metadata.search_indexes_dsl import CourseIndexDsl
-        from elasticsearch_dsl.connections import connections as connectionsDsl
-        from django.conf import settings
-        connectionsDsl.create_connection(
-            hosts=settings.ES_CONNECTIONS['default']['hosts']
-        )
-        import pdb; pdb.set_trace()
-        results = CourseIndexDsl.search().query('match', content_type='course').query('match', _all='{}'.format(query))
-        print('from ES then ORM')
-        # import pdb; pdb.set_trace()
+        # FIXME: need this here to avoid circular import
+        from course_discovery.apps.edx_elasticsearch_extensions.search import ElasticSearchQuery
+        results = ElasticSearchQuery().search(index_name='catalog_dsl', content_type='course', query=query)
         ids = {result.pk for result in results}
 
-        connectionsDsl.remove_connection('default')
         return cls.objects.filter(pk__in=ids)
 
 

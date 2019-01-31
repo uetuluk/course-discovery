@@ -64,7 +64,10 @@ ES_CONNECTIONS = {
 
 ES_INDEXES = {
     'default': [
-        ('catalog_dsl', 'course_discovery.apps.course_metadata.search_indexes_dsl.CatalogIndexDsl'),
+        ('catalog_dsl', [
+            'course_discovery.apps.course_metadata.search_indexes_dsl.CourseIndexDsl',
+            'course_discovery.apps.course_metadata.search_indexes_dsl.CourseRunIndexDsl',
+        ]),
     ],
 }
 

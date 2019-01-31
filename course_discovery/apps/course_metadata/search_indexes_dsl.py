@@ -1,6 +1,5 @@
 import elasticsearch_dsl as es
 
-from course_discovery.apps.edx_elasticsearch_extensions.multi_model_index import MultiModelIndexBase
 from course_discovery.apps.edx_elasticsearch_extensions.abstract_index import DocumentBase
 from .models import Course, CourseRun
 
@@ -30,11 +29,13 @@ class CourseRunIndexDsl(DocumentBase):
     def get_model(self):
         return CourseRun
 
-    def get_index_queryset_for_model(self):
-        return self.get_model().objects.filter(status='published')
+    def get_updated_field(self):
+        return 'modified'
 
-    @staticmethod
-    def create_document_dict(obj):
+    def get_index_queryset(self):
+        return CourseRun.objects.filter(status='published')
+
+    def create_document_dict(self, obj):
         doc = CourseRunIndexDsl(
             content_type = 'courserun',
             uuid=obj.uuid,
@@ -71,15 +72,16 @@ class CourseIndexDsl(DocumentBase):
     def get_model(self):
         return Course
 
-    def get_index_queryset_for_model(self):
-        return self.get_model().objects.filter(uuid__isnull=False)
+    def get_index_queryset(self):
+        return Course.objects.filter(uuid__isnull=False)
 
-    @staticmethod
-    def prepare_course_runs(obj):
+    def get_updated_field(self):
+        return 'modified'
+
+    def prepare_course_runs(self, obj):
         return [course_run.key for course_run in obj.course_runs.all()]
 
-    @staticmethod
-    def create_document_dict(obj):
+    def create_document_dict(self, obj):
         doc = CourseIndexDsl(
             content_type = 'course',
             uuid=obj.uuid,
@@ -87,29 +89,13 @@ class CourseIndexDsl(DocumentBase):
             title=obj.title,
             slug=obj.slug,
             modified=obj.modified,
-            course_runs=CourseIndexDsl.prepare_course_runs(obj),
+            course_runs=self.prepare_course_runs(obj),
             pk=obj.id,
         )
 
         doc.meta.id = 'course.{}'.format(obj.id)
         return doc.to_dict(include_meta=True)
 
-
-class CatalogIndexDsl(MultiModelIndexBase):
-    index_model_mappings = [
-        (Course, CourseIndexDsl),
-        (CourseRun, CourseRunIndexDsl)
-    ]
-
-    def get_updated_field(self):
-        return 'modified'
-
-    def create_document_dict(self, obj):
-        # this method is required.
-        for model, index_model in self.index_model_mappings:
-            if isinstance(obj, model):
-                return index_model.create_document_dict(obj)
-        return {}
 
 #
 # import json

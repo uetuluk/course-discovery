@@ -6,7 +6,6 @@ from django.conf import settings
 import elasticsearch_dsl as es
 from elasticsearch.helpers import bulk
 from elasticsearch_dsl.connections import connections as connectionsDsl
-from course_discovery.apps.core.utils import ElasticsearchUtils
 
 
 class DocumentBase(es.Document):
@@ -34,7 +33,7 @@ class DocumentBase(es.Document):
                         'connection_name': name,
                         'connection': conn,
                         'index_name': index,
-                        'index_class': value,
+                        'index_classes': value,
                     }
         return None
 
@@ -76,7 +75,6 @@ class DocumentBase(es.Document):
             hosts=index['connection']['hosts']
         )
 
-        cls.create_new_index(index)
         cls.prepare_document()
 
         # base queryset for indexing the docs.
@@ -117,10 +115,8 @@ class DocumentBase(es.Document):
         - Gets the queryset slice
         - creates the batch
         - indexes it
-
-        FIXME:temporarily using a list instead of a Qset
         """
-        for start in range(0, len(base_qset), batch_size):
+        for start in range(0, base_qset.count(), batch_size):
             end = start + batch_size
             qset = base_qset[start:end]
             batch = cls.create_batch(list(qset))
@@ -182,17 +178,3 @@ class DocumentBase(es.Document):
                     removed.append(int(item.meta.id))
         for remove_id in removed:
             cls.get(id=remove_id).delete()
-
-    @classmethod
-    def create_new_index(cls, index_config):
-        es = connectionsDsl.get_connection()
-        alias = index_config['index_name']
-        index_name = ElasticsearchUtils.create_index(es, alias, 'ES-DSL')
-
-        body = {
-            'actions': [
-                {'remove': {'alias': alias, 'index': '*'}},
-                {'add': {'alias': alias, 'index': index_name}},
-            ]
-        }
-        es.indices.update_aliases(body)
