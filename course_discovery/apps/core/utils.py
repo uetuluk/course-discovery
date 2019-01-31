@@ -33,7 +33,7 @@ class ElasticsearchUtils(object):
             logger.info('...alias updated.')
 
     @classmethod
-    def create_index(cls, es_connection, prefix):
+    def create_index(cls, es_connection, prefix, index_settings=None):
         """
         Creates a new index whose name is prefixed with the specified value.
 
@@ -45,10 +45,14 @@ class ElasticsearchUtils(object):
         Returns:
             index_name (str): Name of the new index.
         """
+        print("utils: " + prefix)
         timestamp = datetime.datetime.utcnow().strftime('%Y%m%d_%H%M%S')
         index_name = '{alias}_{timestamp}'.format(alias=prefix, timestamp=timestamp)
-        index_settings = settings.ELASTICSEARCH_INDEX_SETTINGS
-        index_settings['settings']['analysis']['filter']['synonym']['synonyms'] = get_synonyms(es_connection)
+        if index_settings is None:
+            index_settings = settings.ELASTICSEARCH_INDEX_SETTINGS
+            index_settings['settings']['analysis']['filter']['synonym']['synonyms'] = get_synonyms(es_connection)
+        elif index_settings == 'ES-DSL':
+            index_settings = settings.ES_INDEX_SETTINGS
         es_connection.indices.create(index=index_name, body=index_settings)
         logger.info('...index [%s] created.', index_name)
         return index_name

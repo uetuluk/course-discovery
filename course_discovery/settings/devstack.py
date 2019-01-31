@@ -56,6 +56,62 @@ PARLER_LANGUAGES = {
      }
 }
 
+ES_CONNECTIONS = {
+    'default': {
+        'hosts': ['http://edx.devstack.elasticsearch:9200'],
+    }
+}
+
+ES_INDEXES = {
+    'default': [
+        ('catalog_dsl_course', [
+            'course_discovery.apps.course_metadata.search_indexes_dsl.CourseIndexDsl',
+            'course_discovery.apps.course_metadata.search_indexes_dsl.CourseRunIndexDsl',
+        ]),
+        # ('catalog_dsl_courserun', 'course_discovery.apps.course_metadata.search_indexes_dsl.CourseRunIndexDsl'),
+    ],
+}
+
+ES_DEFAULT_BATCH_SIZE = 1500
+
+ES_INDEX_SETTINGS = {
+    'settings': {
+        'index': {
+            'number_of_shards': 1,
+            'number_of_replicas': 1
+        },
+        # 'analysis': {
+        #     'analyzer': {
+        #         'lowercase': {
+        #             'type': 'custom',
+        #             'tokenizer': 'keyword',
+        #             'filter': [
+        #                 'lowercase',
+        #                 'synonym',
+        #             ]
+        #         },
+        #         'snowball_with_synonyms': {
+        #             'type': 'custom',
+        #             'filter': [
+        #                 'standard',
+        #                 'lowercase',
+        #                 'snowball',
+        #                 'synonym'
+        #             ],
+        #             'tokenizer': 'standard'
+        #         },
+        #     },
+        #     'filter': {
+        #         'synonym': {
+        #           'type': 'synonym',
+        #           'ignore_case': 'true',
+        #           'synonyms': []
+        #         }
+        #     }
+        # }
+    }
+}
+
 #####################################################################
 # Lastly, see if the developer has any local overrides.
 if os.path.isfile(join(dirname(abspath(__file__)), 'private.py')):
