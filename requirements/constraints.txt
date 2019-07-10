@@ -5,7 +5,8 @@ django<1.12
 django-stdimage<4
 
 # FIXME: 1.x is an ancient version that we should upgrade off of
-elasticsearch<2
+elasticsearch<7
+elasticsearch-dsl<7
 
 # FIXME: 1.8.5 breaks the way we use serialization methods
 # FIXME: 1.8.3 breaks something about OneToOne field validators

@@ -46,6 +46,7 @@ edx-drf-extensions
 edx-opaque-keys
 edx-rest-api-client
 elasticsearch
+elasticsearch-dsl
 html2text==2016.9.19
 jsonfield==1.0.3
 markdown==2.6.6
