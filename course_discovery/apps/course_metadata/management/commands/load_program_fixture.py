@@ -3,6 +3,7 @@ Populate catalog programs for masters sandbox environment
 """
 import logging
 from posixpath import join as urljoin
+from textwrap import dedent
 
 from django import db
 from django.core import serializers
@@ -27,6 +28,7 @@ class Command(BaseCommand):
             --oauth-host http://edx.devstack.lms:18000
             --client-id xxxxxxx --client-secret xxxxx
     """
+    help = dedent(__doc__).strip()
     DEFAULT_PARTNER_CODE = 'edx'
 
     def add_arguments(self, parser):

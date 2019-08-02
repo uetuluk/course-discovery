@@ -4,6 +4,7 @@ import fnmatch
 import json
 import logging
 import os
+from textwrap import dedent
 
 from django.contrib.sites.models import Site
 from django.core.management import BaseCommand
@@ -17,6 +18,7 @@ class Command(BaseCommand):
     """
     Creates Partners and their perspective Sites.
     """
+    help = dedent(__doc__).strip()
     dns_name = None
     theme_path = None
     configuration_filename = None
