@@ -14,7 +14,7 @@ attrs==20.2.0             # via jsonschema, pytest
 authlib==0.15             # via simple-salesforce
 babel==2.8.0              # via sphinx
 backoff==1.10.0           # via -r requirements/base.in
-bcrypt==3.1.7             # via paramiko
+bcrypt==3.2.0             # via paramiko
 beautifulsoup4==4.9.3     # via -r requirements/base.in
 cached-property==1.5.2    # via docker-compose
 certifi==2020.6.20        # via requests
@@ -36,13 +36,13 @@ django-autocomplete-light==3.4.1  # via -c requirements/constraints.txt, -r requ
 django-choices==1.7.1     # via -r requirements/base.in
 django-compressor==2.4    # via -r requirements/base.in, django-libsass
 django-contrib-comments==1.9.2  # via -r requirements/base.in
-django-cors-headers==2.5.3  # via -c requirements/constraints.txt, -r requirements/base.in
+django-cors-headers==3.5.0  # via -r requirements/base.in
 django-debug-toolbar==3.1.1  # via -r requirements/local.in
 django-dynamic-filenames==1.1.4  # via -r requirements/base.in
 django-elasticsearch-debug-toolbar==2.0.0  # via -r requirements/local.in
 django-extensions==3.0.9  # via -r requirements/base.in
 django-filter==2.4.0      # via -r requirements/base.in
-django-fsm==2.7.0         # via -r requirements/base.in
+django-fsm==2.7.1         # via -r requirements/base.in
 django-guardian==2.3.0    # via -r requirements/base.in
 django-haystack==3.0      # via -r requirements/base.in, drf-haystack
 django-libsass==0.8       # via -r requirements/base.in
@@ -86,15 +86,13 @@ edx-sphinx-theme==1.5.0   # via -r requirements/docs.in
 elasticsearch==1.9.0      # via -c requirements/constraints.txt, -r requirements/base.in
 execnet==1.7.1            # via pytest-xdist
 factory-boy==3.1.0        # via -r requirements/test.in
-faker==4.9.0              # via factory-boy
+faker==4.14.0             # via factory-boy
 filelock==3.0.12          # via tox, virtualenv
 freezegun==1.0.0          # via -r requirements/test.in
 future==0.18.2            # via pyjwkest
 html2text==2020.1.16      # via -r requirements/base.in
 idna==2.10                # via requests
 imagesize==1.2.0          # via sphinx
-importlib-metadata==2.0.0  # via jsonschema, markdown, path, pluggy, pytest, tox, virtualenv
-importlib-resources==3.0.0  # via virtualenv
 iniconfig==1.0.1          # via pytest
 isort==4.3.21             # via -r requirements/test.in, pylint
 itypes==1.2.0             # via coreapi
@@ -104,10 +102,10 @@ jsonschema==3.2.0         # via docker-compose
 lazy-object-proxy==1.4.3  # via astroid
 libsass==0.20.1           # via django-libsass
 lxml==4.5.2               # via -r requirements/base.in
-markdown==3.2.2           # via -r requirements/base.in
+markdown==3.3.1           # via -r requirements/base.in
 markupsafe==1.1.1         # via jinja2
 mccabe==0.6.1             # via pylint
-mock==3.0.5               # via -r requirements/test.in
+mock==4.0.2               # via -r requirements/test.in
 mysqlclient==2.0.1        # via -r requirements/test.in
 newrelic==5.20.1.150      # via edx-django-utils
 oauthlib==3.1.0           # via requests-oauthlib, social-auth-core
@@ -115,8 +113,7 @@ openapi-codec==1.3.2      # via django-rest-swagger
 packaging==20.4           # via pytest, sphinx, tox
 paramiko==2.7.2           # via docker
 path.py==12.5.0           # via edx-i18n-tools
-path==13.1.0              # via path.py
-pathlib2==2.3.5           # via pytest
+path==15.0.0              # via path.py
 pbr==5.5.0                # via stevedore
 pillow==7.2.0             # via -r requirements/base.in, django-stdimage
 pluggy==0.13.1            # via pytest, tox
@@ -164,7 +161,7 @@ selenium==3.141.0         # via -r requirements/test.in
 semantic-version==2.8.5   # via edx-drf-extensions
 simple-salesforce==1.10.1  # via -r requirements/base.in
 simplejson==3.17.2        # via django-rest-swagger
-six==1.15.0               # via astroid, bcrypt, cryptography, django-choices, django-compressor, django-contrib-comments, django-simple-history, django-taggit-serializer, djangorestframework-csv, docker, dockerpty, edx-auth-backends, edx-ccx-keys, edx-django-release-util, edx-drf-extensions, edx-i18n-tools, edx-lint, edx-opaque-keys, edx-sphinx-theme, jsonschema, libsass, mock, packaging, pathlib2, progressbar2, pyjwkest, pynacl, python-dateutil, python-memcached, python-utils, responses, social-auth-app-django, social-auth-core, stevedore, tox, transifex-client, unicode-slugify, virtualenv, websocket-client
+six==1.15.0               # via astroid, bcrypt, cryptography, django-choices, django-compressor, django-contrib-comments, django-simple-history, django-taggit-serializer, djangorestframework-csv, docker, dockerpty, edx-auth-backends, edx-ccx-keys, edx-django-release-util, edx-drf-extensions, edx-i18n-tools, edx-lint, edx-opaque-keys, edx-sphinx-theme, jsonschema, libsass, packaging, progressbar2, pyjwkest, pynacl, python-dateutil, python-memcached, python-utils, responses, social-auth-app-django, social-auth-core, tox, transifex-client, unicode-slugify, virtualenv, websocket-client
 slumber==0.7.1            # via edx-rest-api-client
 snowballstemmer==2.0.0    # via sphinx
 git+https://github.com/python-social-auth/social-app-django.git@c00d23c2b45c3317bd35b15ad1b959338689cef8#egg=social-auth-app-django  # via -r requirements/github.in, edx-auth-backends
@@ -178,14 +175,13 @@ sphinxcontrib-jsmath==1.0.1  # via sphinx
 sphinxcontrib-qthelp==1.0.3  # via sphinx
 sphinxcontrib-serializinghtml==1.1.4  # via sphinx
 sqlparse==0.4.1           # via django, django-debug-toolbar
-stevedore==1.32.0         # via edx-django-utils, edx-opaque-keys
+stevedore==3.2.2          # via edx-django-utils, edx-opaque-keys
 testfixtures==6.15.0      # via -r requirements/test.in
 text-unidecode==1.3       # via faker
 texttable==1.6.3          # via docker-compose
 toml==0.10.1              # via pytest, tox
 tox==3.20.1               # via -r requirements/test.in
 transifex-client==0.12.5  # via -c requirements/constraints.txt, -r requirements/local.in
-typed-ast==1.4.1          # via astroid
 unicode-slugify==0.1.3    # via -r requirements/base.in
 unicodecsv==0.14.1        # via djangorestframework-csv
 unidecode==1.1.1          # via unicode-slugify
@@ -195,7 +191,6 @@ virtualenv==20.0.34       # via tox
 websocket-client==0.57.0  # via docker, docker-compose
 wrapt==1.11.2             # via astroid
 xss-utils==0.1.3          # via -r requirements/base.in
-zipp==1.2.0               # via importlib-metadata, importlib-resources
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
